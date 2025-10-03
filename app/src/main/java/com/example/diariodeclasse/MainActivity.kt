@@ -1,31 +1,22 @@
 package com.example.diariodeclasse
 
-import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,23 +42,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.example.diariodeclasse.data.Aluno
 import com.example.diariodeclasse.data.DataSource
+import com.example.diariodeclasse.login.LoginScreen
+import com.example.diariodeclasse.login.cadastro.CadastroScreen
 import com.example.diariodeclasse.ui.theme.DiarioDeClasseTheme
 
-
-
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val TAG = "MainActivity"
         super.onCreate(savedInstanceState)
@@ -76,192 +61,194 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DiarioDeClasseTheme {
-                Scaffold(
-                    topBar = {
-                        DiarioDeClasseTopBar()
+                var showLogin by remember { mutableStateOf(true) }
+                var showCadastro by remember { mutableStateOf(false) }
+                var showMainApp by remember { mutableStateOf(false) }
+
+                when {
+                    showLogin -> {
+                        LoginScreen(
+                            onNavigateToCadastro = {
+                                showLogin = false
+                                showCadastro = true
+                            },
+                            onLoginSuccess = {
+                                showLogin = false
+                                showMainApp = true
+                            }
+                        )
                     }
-                ) { innerPadding ->
-                    DiarioDeClasseApp(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                            .statusBarsPadding()
-                    )
+                    showCadastro -> {
+                        CadastroScreen(
+                            onNavigateToLogin = {
+                                showCadastro = false
+                                showLogin = true
+                            },
+                            onCadastroSuccess = {
+                                showCadastro = false
+                                showMainApp = true
+                            }
+                        )
+                    }
+                    showMainApp -> {
+                        MainAppScreen()
+                    }
                 }
             }
         }
     }
 
-}
-
-@Composable
-fun DiarioDeClasseApp(
-    modifier: Modifier = Modifier
-) {
-    val layoutDirection = LocalLayoutDirection.current
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(
-                start = WindowInsets.safeDrawing.asPaddingValues()
-                    .calculateStartPadding(layoutDirection),
-                end = WindowInsets.safeDrawing.asPaddingValues()
-                    .calculateEndPadding(layoutDirection)
-            )
-    ) {
-        ListaDeAlunos(
-            modifier = Modifier,
-            listaDeAlunos = DataSource().carregarAlunos()
-        )
-    }
-}
-
-@Composable
-fun ListaDeAlunos(
-    modifier: Modifier = Modifier,
-    listaDeAlunos: List<Aluno>
-) {
-    LazyColumn(modifier = modifier) {
-        items(listaDeAlunos) { aluno ->
-            CardAluno(
-                modifier = modifier,
-                fotoAluno = aluno.foto,
-                nomeAluno = aluno.nome,
-                cursoAluno = aluno.curso
-            )
-        }
-    }
-}
-
-@Composable
-fun CardAluno(
-    modifier: Modifier = Modifier,
-    @DrawableRes fotoAluno: Int,
-    nomeAluno: String,
-    cursoAluno: String
-) {
-    var expandir by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            ),
-        shape = RoundedCornerShape(
-            bottomEnd = 0.dp,
-            topStart = 0.dp,
-            bottomStart = 20.dp,
-            topEnd = 20.dp
-        ),
-        elevation = CardDefaults.cardElevation(5.dp)
-    ) {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(id = fotoAluno),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(100.dp)
-                    .weight(1f)
-                    .clip(CircleShape)
-            )
-            Column(
-                modifier = modifier
-                    .weight(2f)
-            )
-            {
-                Text(
-                    text = nomeAluno,
-                    modifier.fillMaxWidth()
-                )
-                Text(
-                    text = cursoAluno,
-                    modifier.fillMaxWidth()
-                )
-            }
-
-            DetalhesAlunoButton(
-                { expandir = !expandir },
-                modifier = modifier
-                    .weight(0.5f)
-                    .wrapContentSize(align = Alignment.CenterEnd)
-            )
-
-        }
-        if (expandir) {
-            DetalhesAluno()
-        }
-    }
-}
-
-@Composable
-fun DetalhesAlunoButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier
-    ) {
-        Icon(
-            imageVector = Icons.Filled.ExpandMore,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary
-        )
-    }
-
-}
-
-@Composable
-fun DetalhesAluno() {
-    Column {
-        Text(
-            text = "Nota: 100"
-        )
-        Text(
-            text = "Faltas: 20%"
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DiarioDeClasseTopBar(modifier: Modifier = Modifier) {
-
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                "Diario de Classe"
-            )
-        },
-        modifier = modifier
-    )
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun DiarioDeClassePreview() {
-    DiarioDeClasseTheme {
+    @Composable
+    fun MainAppScreen() {
         Scaffold(
-            modifier = Modifier,
             topBar = {
                 DiarioDeClasseTopBar()
             }
         ) { innerPadding ->
-            DiarioDeClasseApp(
+            Surface(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(innerPadding)
+            ) {
+                ListaDeAlunos(
+                    listaDeAlunos = DataSource().carregarAlunos()
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun ListaDeAlunos(
+        modifier: Modifier = Modifier,
+        listaDeAlunos: List<Aluno>
+    ) {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(listaDeAlunos) { aluno ->
+                CardAluno(
+                    fotoAluno = aluno.foto,
+                    nomeAluno = aluno.nome,
+                    cursoAluno = aluno.curso
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun CardAluno(
+        @DrawableRes fotoAluno: Int,
+        nomeAluno: String,
+        cursoAluno: String
+    ) {
+        var expandir by remember { mutableStateOf(false) }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                ),
+            shape = RoundedCornerShape(
+                bottomStart = 20.dp,
+                topEnd = 20.dp
+            ),
+            elevation = CardDefaults.cardElevation(5.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = fotoAluno),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = nomeAluno,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            text = cursoAluno,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { expandir = !expandir },
+                        modifier = Modifier.wrapContentSize(Alignment.CenterEnd)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ExpandMore,
+                            contentDescription = if (expandir) "Recolher" else "Expandir"
+                        )
+                    }
+                }
+
+                if (expandir) {
+                    DetalhesAluno()
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DetalhesAluno() {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Nota: 100",
+                style = MaterialTheme.typography.bodyMedium
             )
+            Text(
+                text = "Faltas: 20%",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api @class)
+        @Composable
+        fun DiarioDeClasseTopBar(modifier: Modifier = Modifier) {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Diário de Classe",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                },
+                modifier = modifier
+            )
+        }
+
+        @Preview(showSystemUi = true)
+        @Composable
+        fun DiarioDeClassePreview() {
+            DiarioDeClasseTheme {
+                MainAppScreen()
+            }
         }
     }
 }
