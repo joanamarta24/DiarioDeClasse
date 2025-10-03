@@ -229,7 +229,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api @class)
+    @OptIn(ExperimentalMaterial3Api@class)
         @Composable
         fun DiarioDeClasseTopBar(modifier: Modifier = Modifier) {
             CenterAlignedTopAppBar(
@@ -250,5 +250,4 @@ class MainActivity : ComponentActivity() {
                 MainAppScreen()
             }
         }
-    }
 }
