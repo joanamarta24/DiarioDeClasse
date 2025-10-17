@@ -1,10 +1,10 @@
 package com.example.diariodeclasse.data
 
 import android.R
+import kotlinx.coroutines.delay
 
+private val Unit.account_circle: Int
 class DataSource() {
-    fun  carregarAlunos(): List<Aluno> {
-        return listOf(
             Aluno(
                 nome = "Rafael Costa",
                 foto = R.drawable.account_circle,
