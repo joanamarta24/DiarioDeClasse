@@ -1,5 +1,6 @@
 package com.example.diariodeclasse.ui.theme.User
 
+import android.net.Uri // Importe Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -28,26 +29,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.diariodeclasse.login.cadastro.viewModel
+import coil.compose.rememberAsyncImagePainter // <--- IMPORTANTE: Importação para Coil
+
+// Importe a função viewModel() correta
+import androidx.lifecycle.viewmodel.compose.viewModel // <--- IMPORTANTE: Importação para ViewModel
 
 @OptIn (ExperimentalMaterial3Api::class)
 @Composable
 fun AlunoRegistrationScreen (
-    modifier: Modifier,
-   alunoViewModel: AlunoViewModel = viewModel()
+    modifier: Modifier = Modifier, // Geralmente é bom ter um Modifier com valor padrão
+    alunoViewModel: AlunoViewModel = viewModel() // Usa a função viewModel() do compose
 ){
     val uiState by alunoViewModel.uiState.collectAsState()
 
+    // O LaunchedEffect com Unit só será executado uma vez
+    // Certifique-se de que carregarAluno() realmente carrega os usuários
+    // e atualiza uiState.users.
     LaunchedEffect(Unit) {
-        alunoViewModel.carregarAluno()
+        alunoViewModel.carregarAluno() // Talvez "carregarAlunos()" ou "carregarListaDeAlunos()" seja mais descritivo.
     }
-    val laucher = rememberLauncherForActivityResult(
+
+    val imagePickerLauncher = rememberLauncherForActivityResult( // Renomeado para clareza
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        alunoViewModel.onFotoChange(uri)
+        // O uri pode ser nulo se o usuário cancelar a seleção
+        uri?.let {
+            alunoViewModel.onFotoChange(it)
+        }
     }
+
     Column(
-        modifier = Modifier
+        modifier = modifier // Use o modifier passado como parâmetro
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
@@ -57,7 +69,22 @@ fun AlunoRegistrationScreen (
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Exibição da foto selecionada
+        uiState.fotoUri?.let { uri -> // Garante que a URI não é nula
+            Image(
+                painter = rememberAsyncImagePainter(uri), // Use a URI aqui
+                contentDescription = "Foto selecionada",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(8.dp)
+            )
+        }
 
+        Button(onClick = { imagePickerLauncher.launch("image/*") }) { // Use o launcher corrigido
+            Text("Selecionar Foto")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = uiState.nome,
@@ -83,22 +110,6 @@ fun AlunoRegistrationScreen (
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        uiState.fotoUri?.let {
-            Image(
-                painter = rememberAsyncImagePainter(it),
-                contentDescription = "Foto selecionada",
-                modifier = Modifier
-                    .size(120.dp)
-                    .padding(8.dp)
-            )
-        }
-
-        Button(onClick = { launcher.launch("image/*") }) {
-            Text("Selecionar Foto")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Button(
             onClick = { alunoViewModel.cadastrar() },
             modifier = Modifier.fillMaxWidth()
@@ -113,28 +124,35 @@ fun AlunoRegistrationScreen (
             Spacer(modifier = Modifier.height(16.dp))
             Text("Carregando usuários...")
         } else {
-
             Text("Usuários cadastrados:", style = MaterialTheme.typography.titleMedium)
 
-            uiState.users.forEach { user ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                ) {
-                    user.fotoUri?.let {
-                        Image(
-                            painter = rememberAsyncImagePainter(it),
-                            contentDescription = "Foto",
-                            modifier = Modifier.size(50.dp)
-                        )
+            // Usando Column para uma lista vertical de usuários
+            Column {
+                uiState.users.forEach { user ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                    ) {
+                        user.fotoUri?.let { uri -> // O objeto Aluno também deve ter um fotoUri: Uri?
+                            Image(
+                                painter = rememberAsyncImagePainter(uri),
+                                contentDescription = "Foto do usuário",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        } ?: run {
+                            Image(
+                                painter = rememberAsyncImagePainter(android.R.drawable.ic_menu_gallery), // Exemplo de placeholder
+                                contentDescription = "Sem foto",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("${user.nome} - ${user.login}")
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("${user.nome} - ${user.login}")
                 }
             }
         }
     }
 }
-
