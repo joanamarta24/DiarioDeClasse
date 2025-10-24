@@ -1,4 +1,4 @@
-package com.example.diariodeclasse.ui.theme
+package com.example.diariodeclasse.ui.theme.theme
 
 import androidx.compose.ui.graphics.Color
 

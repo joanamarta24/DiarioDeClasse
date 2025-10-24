@@ -1,4 +1,4 @@
-package com.example.diariodeclasse.login
+package com.example.diariodeclasse.ui.theme.login
 
 data class LoginUIState (
     val errouLoginOuSenha: Boolean = false,

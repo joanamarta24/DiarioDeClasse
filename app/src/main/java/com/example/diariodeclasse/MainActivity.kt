@@ -10,7 +10,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,9 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.diariodeclasse.data.Aluno
 import com.example.diariodeclasse.data.DataSource
-import com.example.diariodeclasse.login.LoginScreen
+import com.example.diariodeclasse.ui.theme.login.LoginScreen
 import com.example.diariodeclasse.login.cadastro.CadastroScreen
-import com.example.diariodeclasse.ui.theme.DiarioDeClasseTheme
+import com.example.diariodeclasse.ui.theme.theme.DiarioDeClasseTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +76,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
                     showCadastro -> {
                         CadastroScreen(
                             onNavigateToLogin = {
@@ -90,6 +89,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
                     showMainApp -> {
                         MainAppScreen()
                     }
@@ -229,7 +229,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api@class)
+    @OptIn(ExperimentalMaterial3Api@ class)
         @Composable
         fun DiarioDeClasseTopBar(modifier: Modifier = Modifier) {
             CenterAlignedTopAppBar(
@@ -250,4 +250,4 @@ class MainActivity : ComponentActivity() {
                 MainAppScreen()
             }
         }
-}
+    }

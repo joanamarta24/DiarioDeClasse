@@ -1,4 +1,4 @@
-package com.example.diariodeclasse.login
+package com.example.diariodeclasse.ui.theme.login
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
